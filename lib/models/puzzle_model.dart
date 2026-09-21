@@ -5,6 +5,8 @@ enum PuzzleGenre {
   observation, // 観察系
   inspiration, // ひらめき
   calculation, // 計算パズル
+  wordplay, // 言葉遊び
+  logic, // 論理パズル
 }
 
 extension PuzzleGenreLabel on PuzzleGenre {
@@ -20,6 +22,10 @@ extension PuzzleGenreLabel on PuzzleGenre {
         return 'ひらめき';
       case PuzzleGenre.calculation:
         return '計算パズル';
+      case PuzzleGenre.wordplay:
+        return '言葉遊び';
+      case PuzzleGenre.logic:
+        return '論理パズル';
     }
   }
 }
