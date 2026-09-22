@@ -72,7 +72,11 @@ void main() {
       expect(container.read(gameProvider)!.isSolved, isFalse);
     });
 
-    test('revealNextHint でヒント段階が1つずつ進む', () {
+    test('revealNextHint でヒント段階が1つずつ進む', () async {
+      // 2つ目以降のヒントはコインを消費する仕様のため、
+      // 事前にコインを付与しておく（広告視聴モックで30コイン取得）。
+      await container.read(progressProvider.notifier).addCoinsFromAd();
+
       container.read(gameProvider.notifier).startPuzzle(_testPuzzle);
       container.read(gameProvider.notifier).revealNextHint();
       expect(container.read(gameProvider)!.hintLevel, 1);
