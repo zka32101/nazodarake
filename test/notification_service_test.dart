@@ -32,12 +32,12 @@ void main() {
   setUp(() {
     calls.clear();
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
-    TestDefaultBinaryMessenger.instance
+    TestWidgetsFlutterBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_channel, defaultHandler);
   });
 
   tearDown(() {
-    TestDefaultBinaryMessenger.instance
+    TestWidgetsFlutterBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_channel, null);
     debugDefaultTargetPlatformOverride = null;
   });
@@ -56,7 +56,7 @@ void main() {
     });
 
     test('requestPermission は権限が拒否された場合 false を返す', () async {
-      TestDefaultBinaryMessenger.instance
+      TestWidgetsFlutterBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(_channel, (call) async {
         calls.add(call);
         if (call.method == 'initialize') return true;
@@ -100,7 +100,7 @@ void main() {
     });
 
     test('プラグインが例外を投げても NotificationService は例外を伝播しない', () async {
-      TestDefaultBinaryMessenger.instance
+      TestWidgetsFlutterBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(_channel, (call) async {
         throw PlatformException(code: 'error', message: 'mock failure');
       });
