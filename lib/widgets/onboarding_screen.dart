@@ -23,7 +23,7 @@ const List<_OnboardingSlide> _slides = [
     title: 'ようこそ、なぞだらけへ！',
     description:
         'なぞなぞ・暗号解読・観察系・ひらめき・計算パズル・言葉遊び・論理パズルなど、'
-        '7ジャンルの謎が全100問以上楽しめる謎解きゲームです。',
+        '7ジャンルの謎が全150問以上楽しめる謎解きゲームです。',
   ),
   _OnboardingSlide(
     icon: Icons.lightbulb_rounded,

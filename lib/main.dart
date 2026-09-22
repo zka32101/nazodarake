@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'providers/progress_provider.dart';
@@ -17,12 +19,19 @@ void main() {
 final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
+/// アプリが対応する言語一覧（日本語・英語）。
+const List<Locale> supportedLocales = [Locale('ja'), Locale('en')];
+
 /// なぞだらけ アプリのルートウィジェット。
-class NazodarakeApp extends StatelessWidget {
+class NazodarakeApp extends ConsumerWidget {
   const NazodarakeApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 設定画面で手動選択した言語（'ja'/'en'）。null なら端末設定に従う。
+    final languageCode = ref.watch(
+      progressProvider.select((state) => state.languageCode),
+    );
     return MaterialApp(
       title: 'なぞだらけ',
       scaffoldMessengerKey: rootScaffoldMessengerKey,
@@ -30,6 +39,14 @@ class NazodarakeApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
+      locale: languageCode == null ? null : Locale(languageCode),
+      supportedLocales: supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       builder: (context, child) =>
           AchievementPopupListener(child: child ?? const SizedBox.shrink()),
       home: const AppEntryPoint(),

@@ -60,7 +60,7 @@ const List<Achievement> allAchievements = [
   Achievement(
     id: 'full_complete',
     title: 'なぞだらけ制覇',
-    description: '全100問をクリアする',
+    description: '全問（150問）をクリアする',
     icon: Icons.emoji_events_rounded,
   ),
   Achievement(

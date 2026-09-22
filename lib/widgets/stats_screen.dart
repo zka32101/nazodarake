@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/puzzles_data.dart';
@@ -18,7 +19,7 @@ class StatsScreen extends ConsumerWidget {
         progress.hintsUsedByPuzzleId.values.fold<int>(0, (a, b) => a + b);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('統計')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.titleStats)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

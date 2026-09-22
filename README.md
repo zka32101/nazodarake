@@ -4,11 +4,11 @@
 
 ## 概要
 
-「なぞだらけ」は、なぞなぞ・暗号解読・観察系・ひらめき・計算パズル・言葉遊び・論理パズルなど複数ジャンルの謎を、11のステージに分けて楽しめる謎解きゲームアプリです。段階的ヒント機能、ローカル進捗保存、正解時の演出に加え、コイン経済・ストーリー演出・SNSシェア・デイリーチャレンジ・実績システムを備え、東京謎解きゲーム・なぞとも・Wonderland等の人気謎解きアプリと肩を並べる機能セットを目指しています。
+「なぞだらけ」は、なぞなぞ・暗号解読・観察系・ひらめき・計算パズル・言葉遊び・論理パズルなど複数ジャンルの謎を、17のステージに分けて楽しめる謎解きゲームアプリです。段階的ヒント機能、ローカル進捗保存、正解時の演出に加え、コイン経済・ストーリー演出・SNSシェア・デイリーチャレンジ・実績システム・日本語/英語の多言語対応・ローカル完結のランキング/フレンド機能を備え、東京謎解きゲーム・なぞとも・Wonderland等の人気謎解きアプリと肩を並べる機能セットを目指しています。
 
 ## コンテンツ数
 
-- 全 **100問**（ステージ1〜5: 8問×5ステージ＝40問／ステージ6〜11: 10問×6ステージ＝60問）＋ 連動謎ボーナス（ステージ12: 断片謎4問＋最終回答1問）
+- 全 **150問**（ステージ1〜5: 8問×5ステージ＝40問／ステージ6〜11: 10問×6ステージ＝60問／ステージ13〜17: 10問×5ステージ＝50問）＋ 連動謎ボーナス（ステージ12: 断片謎4問＋最終回答1問）
 - ジャンル: なぞなぞ・暗号解読・観察系・ひらめき・計算パズル・言葉遊び・論理パズル（7ジャンル）
 - 難易度: ★☆☆（easy）〜 ★★★（hard）の3段階
 
@@ -40,7 +40,7 @@
 - 連続挑戦日数（ストリーク）を記録し、7日連続達成で実績を獲得
 
 ### 実績/バッジシステム
-- 10種類の実績（初クリア、ステージ1制覇、ノーヒントクリア、10問連続正解、全ジャンル制覇、50問クリア、全100問クリア、デイリー7日連続、コイン500枚所持、ステージ10クリア）
+- 10種類の実績（初クリア、ステージ1制覇、ノーヒントクリア、10問連続正解、全ジャンル制覇、50問クリア、全問(150問)クリア、デイリー7日連続、コイン500枚所持、ステージ10クリア）
 - 実績達成時にポップアップ通知（スナックバー）で演出
 - 実績一覧画面で獲得済み/未獲得を可視化
 
@@ -83,6 +83,44 @@
 ### CI（GitHub Actions）
 - `.github/workflows/flutter-ci.yaml` を追加し、`main` への push / PR 時に `flutter pub get && flutter analyze && flutter test` を自動実行
 
+
+## Phase 4 で追加した機能
+
+### フルコンテンツ拡充
+- ステージ13〜17を新設し、10問×5ステージ＝50問を追加（合計17ステージ・150問＋連動謎ボーナス）
+- 新ステージのステージ導入ストーリー（`lib/data/story_data.dart`）を追加
+- 既存の `stageUnlockCost` の式（`50 × (ステージ番号 - 5)`）はそのまま新ステージにも適用される設計
+
+### ローカル完結のフレンド/ランキング機能
+- 外部バックエンド（Firebase等）は使用せず、`shared_preferences` のみで完結するモック実装
+- `lib/models/profile_model.dart` / `lib/providers/profile_provider.dart`: ニックネーム・フレンドコードを管理するユーザープロフィール
+- `lib/models/friend_model.dart` / `lib/providers/friend_provider.dart`: ダミーフレンドデータ＋フレンドコード入力によるローカル追加（実際のサーバー通信は行わない）
+- `lib/models/ranking_model.dart`: 自分とフレンドのスコア（クリア数×100＋コイン）を降順に並べる純粋関数 `buildRanking()`
+- `lib/widgets/ranking_screen.dart` / `lib/widgets/friends_screen.dart`: ランキング画面・フレンド管理画面
+- **将来的な拡張**: サーバー同期を行う場合は `FriendNotifier.addFriendByCode` をAPI呼び出しに置き換え、`buildRanking()` への入力をバックエンド取得値に差し替えるだけで対応できるよう設計している（コード内コメント参照）
+
+### 多言語対応（日本語 / 英語）
+- `flutter_localizations` + `intl` を導入し、`lib/l10n/app_ja.arb` / `lib/l10n/app_en.arb` でUI文言をARB形式管理
+- `pubspec.yaml` の `flutter: generate: true` により、`flutter pub get` 時に `AppLocalizations` が自動生成される
+- タイトル・ステージ選択・謎解き・結果・設定・統計・実績・ランキング・フレンドの主要画面文言を対応
+- 端末の言語設定に自動追従するほか、設定画面から「端末の設定に従う／日本語／English」を手動選択可能（`ProgressState.languageCode` として永続化）
+- 謎の問題文・答え自体は日本語のみ（翻訳対象は固定UI文言のみ）
+
+### ストア公開準備ドキュメント
+- `docs/store_listing.md` を新規作成
+  - アプリ名・簡潔な説明文（日英）、ストア用長文説明、対象年齢層
+  - 必要なスクリーンショット一覧
+  - プライバシーポリシーの雛形（進捗データはローカル保存のみで外部送信なしという方針を明記）
+  - リリースチェックリスト
+
+### 実機ビルド設定の整備
+- 本リポジトリには現時点で `android/` `ios/` ディレクトリがまだ生成されていないため、実際のプラットフォーム設定ファイル編集は次のステップとして残している
+- 実機ビルドを行う場合は、まず `flutter create --platforms=android,ios .` を実行してプラットフォームディレクトリを生成したうえで、`android/app/build.gradle` の `applicationId` と `ios/Runner/Info.plist` の Bundle Identifier / 表示名を、それぞれ `com.nazodarake.app` / 「なぞだらけ」に設定してください（詳細は `docs/store_listing.md` のリリースチェックリストを参照）
+- 署名設定（Android keystore, iOS 配布用証明書）は本番鍵を用意できる環境で別途行う必要があります
+
+### スコープ外とした項目
+- mp3等の実音声バイナリ・実画像（アイコン/スプラッシュ）バイナリの生成・配置は、Phase 3に引き続きスコープ外としています（`assets/sounds/README.md`, `assets/icon/README.md` を参照）
+
 ## セットアップ
 
 ```bash
@@ -109,9 +147,12 @@ lib/
 ├── models/
 │   ├── puzzle_model.dart              # 謎データモデル・正誤判定ロジック
 │   ├── achievement_model.dart         # 実績定義・達成判定ロジック
-│   └── linked_puzzle_model.dart       # 連動謎モデル(LinkedPuzzleSet/LinkedFragmentPuzzle)
+│   ├── linked_puzzle_model.dart       # 連動謎モデル(LinkedPuzzleSet/LinkedFragmentPuzzle)
+│   ├── profile_model.dart             # ユーザープロフィール(ニックネーム/フレンドコード)
+│   ├── friend_model.dart              # フレンドモデル(ローカル完結・ダミーデータ)
+│   └── ranking_model.dart             # ランキング計算(buildRanking純粋関数)
 ├── data/
-│   ├── puzzles_data.dart              # 謎解きコンテンツ本体(100問・11ステージ)
+│   ├── puzzles_data.dart              # 謎解きコンテンツ本体(150問・17ステージ)
 │   ├── story_data.dart                # ナビゲーターキャラ・ステージ導入ストーリー
 │   └── linked_puzzles_data.dart       # 連動謎(ステージ12)のデータ
 ├── providers/
@@ -122,7 +163,9 @@ lib/
 │   ├── linked_puzzle_provider.dart    # 連動謎の進行状態管理
 │   ├── free_play_provider.dart        # フリープレイの絞り込みロジック
 │   ├── sound_provider.dart            # 効果音サービスのDIプロバイダー
-│   └── notification_provider.dart     # 通知トグルの操作をまとめるコントローラー
+│   ├── notification_provider.dart     # 通知トグルの操作をまとめるコントローラー
+│   ├── profile_provider.dart          # ユーザープロフィールの永続化
+│   └── friend_provider.dart           # フレンドリストの永続化(ローカル完結モック)
 ├── services/
 │   ├── sound_service.dart             # audioplayers を用いた効果音再生(失敗時は無視)
 │   └── notification_service.dart      # flutter_local_notifications を用いたリマインダー通知
@@ -140,12 +183,21 @@ lib/
     ├── achievements_screen.dart       # 実績一覧・ポップアップ通知
     ├── story_intro_dialog.dart        # ステージ導入ミニストーリー
     ├── ad_reward_dialog.dart          # 広告視聴(モック)ダイアログ
-    ├── settings_screen.dart           # 設定画面
-    └── stats_screen.dart              # 統計画面
+    ├── settings_screen.dart           # 設定画面(ニックネーム編集・言語切替を含む)
+    ├── stats_screen.dart              # 統計画面
+    ├── ranking_screen.dart            # ローカル完結ランキング画面
+    └── friends_screen.dart            # フレンド管理画面(ローカル完結モック)
 
 assets/
 ├── sounds/                            # 効果音配置用(README.md に実ファイル未同梱の旨を記載)
 └── icon/                              # アプリアイコン/スプラッシュ配置用(同上)
+
+lib/l10n/
+├── app_ja.arb                          # 日本語UI文言(テンプレート/正)
+└── app_en.arb                          # 英語UI文言
+
+docs/
+└── store_listing.md                    # ストア公開準備ドキュメント
 
 test/
 ├── puzzle_model_test.dart             # モデル・正誤判定のテスト
@@ -156,7 +208,9 @@ test/
 ├── free_play_filter_test.dart         # フリープレイ絞り込みロジックのテスト
 ├── onboarding_and_notification_test.dart # オンボーディング/通知フラグ・リマインダー判定のテスト
 ├── onboarding_widget_test.dart        # オンボーディング画面遷移のウィジェットテスト
-└── widget_test.dart                   # 画面遷移のウィジェットテスト
+├── widget_test.dart                   # 画面遷移のウィジェットテスト
+├── ranking_test.dart                  # ランキングのソートロジックのテスト
+└── phase4_provider_test.dart          # 言語設定・プロフィール・フレンド機能のテスト
 
 .github/workflows/
 └── flutter-ci.yaml                    # push/PR時に analyze・test を自動実行するCI
@@ -172,6 +226,7 @@ test/
 - audioplayers (効果音再生 / 実音声ファイルは別途配置が必要)
 - flutter_local_notifications + timezone (ローカル通知)
 - flutter_launcher_icons / flutter_native_splash (アイコン・スプラッシュ設定基盤 / 実画像は別途配置が必要)
+- flutter_localizations + intl (日本語/英語の多言語対応、ARBファイルから自動生成)
 
 ## ライセンス
 
