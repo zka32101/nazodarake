@@ -43,6 +43,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // タイトル画面のボタン数が多く、テスト用ビューポートでは
+    // 「統計を見る」が画面外にあるためスクロールしてから操作する。
+    await tester.ensureVisible(find.text('統計を見る'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('統計を見る'));
     await tester.pumpAndSettle();
 
