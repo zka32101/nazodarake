@@ -35,7 +35,7 @@ class RankingScreen extends ConsumerWidget {
       body: Column(
         children: [
           Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Text(
               AppLocalizations.of(context)!.rankingDisclaimer,
               style: const TextStyle(fontSize: 12, color: Colors.grey),

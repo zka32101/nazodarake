@@ -63,7 +63,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context)!.friendsCodeInputLabel,
                       hintText: '例: NAZO-1234',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                   ),
                 ),
