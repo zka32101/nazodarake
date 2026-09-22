@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nazodarake/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../main.dart' show rootScaffoldMessengerKey;
@@ -13,7 +14,7 @@ class AchievementsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final unlockedIds = ref.watch(unlockedAchievementsProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('実績')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.titleAchievements)),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: allAchievements.length,

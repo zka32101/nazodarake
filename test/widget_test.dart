@@ -9,8 +9,13 @@ void main() {
   setUp(() {
     // オンボーディング表示済みとしてタイトル画面から始まるようにする
     // （オンボーディング自体のテストは onboarding_and_notification_test.dart 等を参照）。
+    // languageCode を明示的に 'ja' に固定し、テスト実行環境のロケール設定に
+    // 依存せず常に日本語UIでテストできるようにする。
     SharedPreferences.setMockInitialValues({
-      'nazodarake_progress_v1': jsonEncode({'hasSeenOnboarding': true}),
+      'nazodarake_progress_v1': jsonEncode({
+        'hasSeenOnboarding': true,
+        'languageCode': 'ja',
+      }),
     });
   });
 

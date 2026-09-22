@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nazodarake/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/puzzle_model.dart';
@@ -17,10 +18,11 @@ class StageSelectScreen extends ConsumerWidget {
     final puzzlesByStage = ref.watch(puzzlesByStageProvider);
     final stageNumbers = puzzlesByStage.keys.toList()..sort();
     final coins = ref.watch(progressProvider).coins;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ステージ選択'),
+        title: Text(l10n.stageSelectTitle),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),

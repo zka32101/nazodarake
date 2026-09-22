@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nazodarake/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/linked_puzzles_data.dart';
@@ -7,7 +8,9 @@ import '../providers/progress_provider.dart';
 import 'achievements_screen.dart' show AchievementsScreen;
 import 'daily_challenge_screen.dart';
 import 'free_play_screen.dart';
+import 'friends_screen.dart';
 import 'linked_puzzle_screen.dart';
+import 'ranking_screen.dart';
 import 'settings_screen.dart';
 import 'stage_select_screen.dart';
 import 'stats_screen.dart';
@@ -20,6 +23,7 @@ class TitleScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final coins = ref.watch(progressProvider).coins;
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
         appBar: AppBar(
           title: const Text(navigatorName),
@@ -77,7 +81,7 @@ class TitleScreen extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.play_arrow_rounded),
-                      label: const Text('ゲームをはじめる'),
+                      label: Text(l10n.titleStartGame),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -92,7 +96,7 @@ class TitleScreen extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.today_rounded),
-                      label: const Text('デイリーチャレンジ'),
+                      label: Text(l10n.titleDailyChallenge),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -107,7 +111,7 @@ class TitleScreen extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.tune_rounded),
-                      label: const Text('フリープレイ（絞り込み）'),
+                      label: Text(l10n.titleFreePlay),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -124,7 +128,7 @@ class TitleScreen extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.link_rounded),
-                      label: const Text('連動謎ボーナス'),
+                      label: Text(l10n.titleLinkedBonus),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -139,7 +143,7 @@ class TitleScreen extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.emoji_events_rounded),
-                      label: const Text('実績'),
+                      label: Text(l10n.titleAchievements),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -154,7 +158,37 @@ class TitleScreen extends ConsumerWidget {
                         );
                       },
                       icon: const Icon(Icons.bar_chart_rounded),
-                      label: const Text('統計を見る'),
+                      label: Text(l10n.titleStats),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const RankingScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.leaderboard_rounded),
+                      label: Text(l10n.titleRanking),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const FriendsScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.people_alt_rounded),
+                      label: Text(l10n.titleFriends),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -167,7 +201,7 @@ class TitleScreen extends ConsumerWidget {
                       );
                     },
                     icon: const Icon(Icons.settings_rounded),
-                    label: const Text('設定'),
+                    label: Text(l10n.titleSettings),
                   ),
                 ],
               ),

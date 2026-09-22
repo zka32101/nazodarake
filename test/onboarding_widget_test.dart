@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nazodarake/main.dart';
@@ -5,8 +7,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   setUp(() {
-    // 初回起動を想定し、進捗データなし（オンボーディング未表示）の状態にする。
-    SharedPreferences.setMockInitialValues({});
+    // 初回起動を想定し、オンボーディング未表示の状態にする。
+    // languageCode は 'ja' に固定し、テスト実行環境のロケール設定に依存せず
+    // 常に日本語UIでテストできるようにする。
+    SharedPreferences.setMockInitialValues({
+      'nazodarake_progress_v1': jsonEncode({'languageCode': 'ja'}),
+    });
   });
 
   testWidgets('初回起動時はオンボーディングが表示され、完了するとタイトル画面に遷移する', (tester) async {

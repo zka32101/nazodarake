@@ -23,6 +23,7 @@ class ProgressState {
     this.clearedLinkedSetIds = const <String>{},
     this.hasSeenOnboarding = false,
     this.notificationsEnabled = false,
+    this.languageCode,
   });
 
   final Set<String> clearedPuzzleIds;
@@ -67,6 +68,9 @@ class ProgressState {
   /// デイリーチャレンジ未挑戦リマインダー通知が有効かどうか。
   final bool notificationsEnabled;
 
+  /// 手動で選択した表示言語（'ja' / 'en'）。null の場合は端末設定に従う。
+  final String? languageCode;
+
   int get totalAttempts => wrongAttempts + correctAttempts;
 
   double get accuracy {
@@ -92,6 +96,7 @@ class ProgressState {
     Set<String>? clearedLinkedSetIds,
     bool? hasSeenOnboarding,
     bool? notificationsEnabled,
+    Object? languageCode = _unset,
   }) {
     return ProgressState(
       clearedPuzzleIds: clearedPuzzleIds ?? this.clearedPuzzleIds,
@@ -114,6 +119,8 @@ class ProgressState {
       clearedLinkedSetIds: clearedLinkedSetIds ?? this.clearedLinkedSetIds,
       hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
+      languageCode:
+          identical(languageCode, _unset) ? this.languageCode : languageCode as String?,
     );
   }
 
@@ -135,6 +142,7 @@ class ProgressState {
         'clearedLinkedSetIds': clearedLinkedSetIds.toList(),
         'hasSeenOnboarding': hasSeenOnboarding,
         'notificationsEnabled': notificationsEnabled,
+        'languageCode': languageCode,
       };
 
   factory ProgressState.fromJson(Map<String, dynamic> json) {
@@ -171,9 +179,14 @@ class ProgressState {
               .toSet(),
       hasSeenOnboarding: json['hasSeenOnboarding'] as bool? ?? false,
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? false,
+      languageCode: json['languageCode'] as String?,
     );
   }
 }
+
+/// [ProgressState.copyWith] で「明示的にnullを渡したい」場合と
+/// 「変更しない」場合を区別するための内部センチネル値。
+const Object _unset = Object();
 
 /// 謎を1問クリアしたときに得られるコイン報酬。
 const int coinsPerClear = 10;
@@ -354,6 +367,12 @@ class ProgressNotifier extends StateNotifier<ProgressState> {
 
   Future<void> setSoundEnabled(bool enabled) async {
     state = state.copyWith(soundEnabled: enabled);
+    await _persist();
+  }
+
+  /// 表示言語を手動で設定する。null を渡すと端末設定に従う（自動）に戻す。
+  Future<void> setLanguageCode(String? languageCode) async {
+    state = state.copyWith(languageCode: languageCode);
     await _persist();
   }
 

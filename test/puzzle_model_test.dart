@@ -111,6 +111,11 @@ void main() {
       expect(allStageNumbers.length, greaterThanOrEqualTo(5));
     });
 
+    test('Phase4: 合計150問以上・16ステージ以上（ステージ12の連動謎ボーナスを除く）が存在する', () {
+      expect(allPuzzles.length, greaterThanOrEqualTo(150));
+      expect(allStageNumbers.length, greaterThanOrEqualTo(16));
+    });
+
     test('全問にヒントが1つ以上設定されている', () {
       for (final puzzle in allPuzzles) {
         expect(puzzle.hints, isNotEmpty, reason: '${puzzle.id} にヒントがありません');

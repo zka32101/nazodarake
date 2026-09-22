@@ -21,3 +21,6 @@ build/
 /web/
 
 coverage/
+
+# gen_l10n が生成するローカライズ済みDartファイル（ARBファイルが正）
+/lib/l10n/generated/
