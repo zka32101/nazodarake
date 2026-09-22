@@ -19,7 +19,7 @@ class StatsScreen extends ConsumerWidget {
         progress.hintsUsedByPuzzleId.values.fold<int>(0, (a, b) => a + b);
 
     return Scaffold(
-      appBar: AppBar(title: Text(AppLocalizations.of(context)!.titleStats)),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.statsScreenTitle)),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

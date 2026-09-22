@@ -1202,7 +1202,7 @@ const List<Puzzle> allPuzzles = [
     genre: PuzzleGenre.observation,
     question: '満月から次の満月までの周期は、約何日でしょう？',
     options: ['7日', '14日', '29.5日', '60日'],
-    answer: '29.5',
+    answer: '29.5日',
     hints: ['1か月とほぼ同じ長さです', '正確には29.5日ほど', '「朔望月」と呼ばれる周期です'],
     difficulty: PuzzleDifficulty.normal,
     explanation: '月の満ち欠けの周期(朔望月)は約29.5日です。',
