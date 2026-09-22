@@ -47,6 +47,26 @@ class StatsScreen extends ConsumerWidget {
             label: '使用したヒント合計',
             value: '$totalHints 回',
           ),
+          _StatCard(
+            icon: Icons.monetization_on_rounded,
+            label: '所持コイン',
+            value: '${progress.coins} 枚',
+          ),
+          _StatCard(
+            icon: Icons.local_fire_department_rounded,
+            label: '最高連続正解数',
+            value: '${progress.bestCorrectStreak} 問',
+          ),
+          _StatCard(
+            icon: Icons.today_rounded,
+            label: 'デイリーチャレンジ連続日数',
+            value: '${progress.dailyStreak} 日',
+          ),
+          _StatCard(
+            icon: Icons.emoji_events_rounded,
+            label: '獲得済み実績',
+            value: '${progress.unlockedAchievementIds.length} / 10 個',
+          ),
         ],
       ),
     );

@@ -50,14 +50,22 @@ class GameNotifier extends StateNotifier<PuzzlePlayState?> {
   }
 
   /// ヒントを1段階開放する。
-  void revealNextHint() {
+  /// コインが不足していて開放できない場合は false を返す。
+  bool revealNextHint() {
     final current = state;
-    if (current == null) return;
+    if (current == null) return false;
     final maxLevel = current.puzzle.hints.length;
-    if (current.hintLevel >= maxLevel) return;
+    if (current.hintLevel >= maxLevel) return false;
     final newLevel = current.hintLevel + 1;
+    // hintLevel(0始まり)。1つ目(newLevel==1)は無料、2つ目以降はコイン消費。
+    final progressNotifier = _ref.read(progressProvider.notifier);
+    if (!progressNotifier.canAffordHint(newLevel - 1)) {
+      return false;
+    }
     state = current.copyWith(hintLevel: newLevel, isWrongFeedback: false);
-    _ref.read(progressProvider.notifier).recordHintUsed(current.puzzle.id);
+    progressNotifier.recordHintUsed(current.puzzle.id);
+    progressNotifier.spendCoinsForHint(newLevel - 1);
+    return true;
   }
 
   /// ユーザーの回答を判定する。
@@ -109,11 +117,26 @@ final isStageClearedProvider = Provider.family<bool, int>((ref, stage) {
   return puzzles.every((p) => progress.clearedPuzzleIds.contains(p.id));
 });
 
-/// 指定ステージがアンロックされているか（1ステージ目は常に開放、
-/// それ以外は直前のステージがクリア済みなら開放）。
+/// 指定ステージがアンロックされているか。
+/// ステージ1〜5: 1ステージ目は常に開放、それ以外は直前のステージがクリア済みなら開放。
+/// ステージ6以降: 直前のステージクリア済み、かつコインでアンロック済みの場合に開放。
 final isStageUnlockedProvider = Provider.family<bool, int>((ref, stage) {
   if (stage <= 1) return true;
-  return ref.watch(isStageClearedProvider(stage - 1));
+  if (stage <= 5) {
+    return ref.watch(isStageClearedProvider(stage - 1));
+  }
+  final previousCleared = ref.watch(isStageClearedProvider(stage - 1));
+  final progress = ref.watch(progressProvider);
+  return previousCleared && progress.unlockedStages.contains(stage);
+});
+
+/// コインでアンロック可能なステージかどうか（直前のステージはクリア済みだが
+/// まだコインでのアンロックが済んでいない場合に true）。
+final isStagePurchasableProvider = Provider.family<bool, int>((ref, stage) {
+  if (stage <= 5) return false;
+  final previousCleared = ref.watch(isStageClearedProvider(stage - 1));
+  final progress = ref.watch(progressProvider);
+  return previousCleared && !progress.unlockedStages.contains(stage);
 });
 
 /// 指定ステージのクリア済み問題数を返す。

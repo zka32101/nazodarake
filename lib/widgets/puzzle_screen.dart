@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/puzzle_model.dart';
 import '../providers/game_provider.dart';
+import '../providers/progress_provider.dart';
 import 'result_screen.dart';
 
 /// 謎解き画面。渡された [puzzles] を順番に出題する。
@@ -73,11 +74,26 @@ class _PuzzleScreenState extends ConsumerState<PuzzleScreen> {
     final puzzle = playState.puzzle;
     final colorScheme = Theme.of(context).colorScheme;
 
+    final coins = ref.watch(progressProvider).coins;
     return Scaffold(
       appBar: AppBar(
         title: Text(
           '第${puzzle.stage}ステージ  ${_index + 1}/${widget.puzzles.length}問',
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Center(
+              child: Row(
+                children: [
+                  const Icon(Icons.monetization_on_rounded, color: Colors.amber),
+                  const SizedBox(width: 4),
+                  Text('$coins'),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -215,6 +231,8 @@ class _HintSection extends ConsumerWidget {
     final puzzle = playState.puzzle;
     final hintLevel = playState.hintLevel;
     final hasMoreHints = hintLevel < puzzle.hints.length;
+    // 最初のヒント(hintLevel==0)は無料、以降はコインを消費する。
+    final nextHintCost = hintLevel == 0 ? 0 : hintCostCoins;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,9 +256,20 @@ class _HintSection extends ConsumerWidget {
           ),
         if (hasMoreHints)
           OutlinedButton.icon(
-            onPressed: () => ref.read(gameProvider.notifier).revealNextHint(),
+            onPressed: () {
+              final revealed = ref.read(gameProvider.notifier).revealNextHint();
+              if (!revealed) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('コインが足りません。広告を見てコインを獲得しよう！')),
+                );
+              }
+            },
             icon: const Icon(Icons.lightbulb_outline_rounded),
-            label: Text('ヒントを見る (${hintLevel + 1}/${puzzle.hints.length})'),
+            label: Text(
+              nextHintCost == 0
+                  ? 'ヒントを見る (${hintLevel + 1}/${puzzle.hints.length}) ・無料'
+                  : 'ヒントを見る (${hintLevel + 1}/${puzzle.hints.length}) ・$nextHintCostコイン',
+            ),
           ),
       ],
     );

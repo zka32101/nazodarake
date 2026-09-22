@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../models/puzzle_model.dart';
 
@@ -12,6 +13,14 @@ class ResultScreen extends StatelessWidget {
 
   final Puzzle puzzle;
   final bool isLastPuzzle;
+
+  Future<void> _shareResult(BuildContext context) async {
+    final text = '謎解きアプリ「なぞだらけ」で\n'
+        '第${puzzle.stage}ステージの謎「${puzzle.question}」を解きました！\n'
+        '難易度: ${puzzle.difficulty.label} / ジャンル: ${puzzle.genre.label}\n'
+        'あなたも挑戦してみませんか？ #なぞだらけ';
+    await SharePlus.instance.share(ShareParams(text: text));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +75,16 @@ class ResultScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _shareResult(context),
+                    icon: const Icon(Icons.ios_share_rounded),
+                    label: const Text('結果をシェアする'),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
