@@ -202,6 +202,7 @@ class ProgressNotifier extends StateNotifier<ProgressState> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     _prefs = prefs;
     final raw = prefs.getString(_prefsKey);
     if (raw != null) {
@@ -216,6 +217,9 @@ class ProgressNotifier extends StateNotifier<ProgressState> {
 
   Future<void> _persist() async {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
+    // dispose 済みの Notifier で state にアクセスすると例外になるため、
+    // 非同期永続化の完了前に dispose された場合はここで打ち切る。
+    if (!mounted) return;
     _prefs = prefs;
     await prefs.setString(_prefsKey, jsonEncode(state.toJson()));
   }
