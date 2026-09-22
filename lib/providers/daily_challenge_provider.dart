@@ -25,10 +25,9 @@ int _dateSeed(DateTime date) {
 /// 指定した日付に対応するデイリーチャレンジの謎を、決定的に1問選ぶ。
 /// 同じ日付を渡せば必ず同じ謎が返る。
 Puzzle dailyPuzzleForDate(DateTime date) {
-  final puzzles = allPuzzles;
   final seed = _dateSeed(date);
-  final index = seed % puzzles.length;
-  return puzzles[index];
+  final index = seed % allPuzzles.length;
+  return allPuzzles[index];
 }
 
 /// 今日の日付（時刻を切り捨てたローカル日付）。
