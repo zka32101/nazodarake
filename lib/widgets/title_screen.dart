@@ -22,7 +22,7 @@ class TitleScreen extends ConsumerWidget {
     final coins = ref.watch(progressProvider).coins;
     return Scaffold(
         appBar: AppBar(
-          title: Text(navigatorName),
+          title: const Text(navigatorName),
           centerTitle: false,
           actions: [
             Padding(
@@ -117,7 +117,7 @@ class TitleScreen extends ConsumerWidget {
                       onPressed: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => LinkedPuzzleScreen(
+                            builder: (_) => const LinkedPuzzleScreen(
                               set: stage12LinkedPuzzleSet,
                             ),
                           ),
