@@ -19,6 +19,10 @@ class ProgressState {
     this.dailyStreak = 0,
     this.lastDailyCompletedDate,
     this.clearedDailyDates = const <String>{},
+    this.clearedLinkedFragmentIds = const <String>{},
+    this.clearedLinkedSetIds = const <String>{},
+    this.hasSeenOnboarding = false,
+    this.notificationsEnabled = false,
   });
 
   final Set<String> clearedPuzzleIds;
@@ -51,6 +55,18 @@ class ProgressState {
   /// クリア済みのデイリーチャレンジ日付一覧。
   final Set<String> clearedDailyDates;
 
+  /// クリア済みの連動謎（断片）ID一覧。
+  final Set<String> clearedLinkedFragmentIds;
+
+  /// 最終回答まで解き終えた連動謎セットID一覧。
+  final Set<String> clearedLinkedSetIds;
+
+  /// チュートリアル（オンボーディング）を表示済みかどうか。
+  final bool hasSeenOnboarding;
+
+  /// デイリーチャレンジ未挑戦リマインダー通知が有効かどうか。
+  final bool notificationsEnabled;
+
   int get totalAttempts => wrongAttempts + correctAttempts;
 
   double get accuracy {
@@ -72,6 +88,10 @@ class ProgressState {
     int? dailyStreak,
     String? lastDailyCompletedDate,
     Set<String>? clearedDailyDates,
+    Set<String>? clearedLinkedFragmentIds,
+    Set<String>? clearedLinkedSetIds,
+    bool? hasSeenOnboarding,
+    bool? notificationsEnabled,
   }) {
     return ProgressState(
       clearedPuzzleIds: clearedPuzzleIds ?? this.clearedPuzzleIds,
@@ -89,6 +109,11 @@ class ProgressState {
       lastDailyCompletedDate:
           lastDailyCompletedDate ?? this.lastDailyCompletedDate,
       clearedDailyDates: clearedDailyDates ?? this.clearedDailyDates,
+      clearedLinkedFragmentIds:
+          clearedLinkedFragmentIds ?? this.clearedLinkedFragmentIds,
+      clearedLinkedSetIds: clearedLinkedSetIds ?? this.clearedLinkedSetIds,
+      hasSeenOnboarding: hasSeenOnboarding ?? this.hasSeenOnboarding,
+      notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
     );
   }
 
@@ -106,6 +131,10 @@ class ProgressState {
         'dailyStreak': dailyStreak,
         'lastDailyCompletedDate': lastDailyCompletedDate,
         'clearedDailyDates': clearedDailyDates.toList(),
+        'clearedLinkedFragmentIds': clearedLinkedFragmentIds.toList(),
+        'clearedLinkedSetIds': clearedLinkedSetIds.toList(),
+        'hasSeenOnboarding': hasSeenOnboarding,
+        'notificationsEnabled': notificationsEnabled,
       };
 
   factory ProgressState.fromJson(Map<String, dynamic> json) {
@@ -132,6 +161,16 @@ class ProgressState {
       lastDailyCompletedDate: json['lastDailyCompletedDate'] as String?,
       clearedDailyDates:
           ((json['clearedDailyDates'] as List?) ?? []).cast<String>().toSet(),
+      clearedLinkedFragmentIds:
+          ((json['clearedLinkedFragmentIds'] as List?) ?? [])
+              .cast<String>()
+              .toSet(),
+      clearedLinkedSetIds:
+          ((json['clearedLinkedSetIds'] as List?) ?? [])
+              .cast<String>()
+              .toSet(),
+      hasSeenOnboarding: json['hasSeenOnboarding'] as bool? ?? false,
+      notificationsEnabled: json['notificationsEnabled'] as bool? ?? false,
     );
   }
 }
@@ -163,6 +202,7 @@ class ProgressNotifier extends StateNotifier<ProgressState> {
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
     _prefs = prefs;
     final raw = prefs.getString(_prefsKey);
     if (raw != null) {
@@ -177,6 +217,9 @@ class ProgressNotifier extends StateNotifier<ProgressState> {
 
   Future<void> _persist() async {
     final prefs = _prefs ?? await SharedPreferences.getInstance();
+    // dispose 済みの Notifier で state にアクセスすると例外になるため、
+    // 非同期永続化の完了前に dispose された場合はここで打ち切る。
+    if (!mounted) return;
     _prefs = prefs;
     await prefs.setString(_prefsKey, jsonEncode(state.toJson()));
   }
@@ -270,6 +313,42 @@ class ProgressNotifier extends StateNotifier<ProgressState> {
       clearedDailyDates: {...state.clearedDailyDates, today},
       coins: state.coins + coinsPerClear,
     );
+    await _persist();
+  }
+
+  /// 連動謎の断片を1問クリアした際の記録（コイン報酬あり）。
+  Future<void> markLinkedFragmentCleared(String fragmentId) async {
+    if (state.clearedLinkedFragmentIds.contains(fragmentId)) return;
+    state = state.copyWith(
+      clearedLinkedFragmentIds: {
+        ...state.clearedLinkedFragmentIds,
+        fragmentId,
+      },
+      coins: state.coins + coinsPerClear,
+    );
+    await _persist();
+  }
+
+  /// 連動謎セットの最終回答まで正解した際の記録（追加コイン報酬あり）。
+  Future<void> markLinkedSetCleared(String setId) async {
+    if (state.clearedLinkedSetIds.contains(setId)) return;
+    state = state.copyWith(
+      clearedLinkedSetIds: {...state.clearedLinkedSetIds, setId},
+      coins: state.coins + coinsPerClear * 3,
+    );
+    await _persist();
+  }
+
+  /// オンボーディング（チュートリアル）を表示済みとして記録する。
+  Future<void> markOnboardingSeen() async {
+    if (state.hasSeenOnboarding) return;
+    state = state.copyWith(hasSeenOnboarding: true);
+    await _persist();
+  }
+
+  /// デイリーチャレンジ未挑戦リマインダー通知のON/OFFを切り替える。
+  Future<void> setNotificationsEnabled(bool enabled) async {
+    state = state.copyWith(notificationsEnabled: enabled);
     await _persist();
   }
 

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../data/linked_puzzles_data.dart';
 import '../data/story_data.dart';
 import '../providers/progress_provider.dart';
 import 'achievements_screen.dart' show AchievementsScreen;
 import 'daily_challenge_screen.dart';
+import 'free_play_screen.dart';
+import 'linked_puzzle_screen.dart';
 import 'settings_screen.dart';
 import 'stage_select_screen.dart';
 import 'stats_screen.dart';
@@ -19,7 +22,7 @@ class TitleScreen extends ConsumerWidget {
     final coins = ref.watch(progressProvider).coins;
     return Scaffold(
         appBar: AppBar(
-          title: Text(navigatorName),
+          title: const Text(navigatorName),
           centerTitle: false,
           actions: [
             Padding(
@@ -90,6 +93,38 @@ class TitleScreen extends ConsumerWidget {
                       },
                       icon: const Icon(Icons.today_rounded),
                       label: const Text('デイリーチャレンジ'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.tonalIcon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const FreePlayScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.tune_rounded),
+                      label: const Text('フリープレイ（絞り込み）'),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const LinkedPuzzleScreen(
+                              set: stage12LinkedPuzzleSet,
+                            ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.link_rounded),
+                      label: const Text('連動謎ボーナス'),
                     ),
                   ),
                   const SizedBox(height: 12),

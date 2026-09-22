@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/notification_provider.dart';
 import '../providers/progress_provider.dart';
+import 'onboarding_screen.dart';
 
-/// 簡易設定画面：音のオン/オフ、進捗リセット。
+/// 簡易設定画面：音のオン/オフ、通知のオン/オフ、チュートリアル再表示、進捗リセット。
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -23,6 +25,25 @@ class SettingsScreen extends ConsumerWidget {
               ref.read(progressProvider.notifier).setSoundEnabled(value);
             },
           ),
+          SwitchListTile(
+            title: const Text('デイリーチャレンジ通知'),
+            subtitle: const Text('未挑戦の日に毎日20時ごろリマインド通知します'),
+            value: progress.notificationsEnabled,
+            onChanged: (value) => _handleNotificationToggle(context, ref, value),
+          ),
+          const Divider(height: 32),
+          ListTile(
+            leading: const Icon(Icons.school_rounded),
+            title: const Text('あそびかたをもう一度見る'),
+            subtitle: const Text('初回起動時のチュートリアルを再表示します'),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const OnboardingScreen(isReplay: true),
+                ),
+              );
+            },
+          ),
           const Divider(height: 32),
           ListTile(
             leading: const Icon(Icons.delete_forever_rounded),
@@ -33,6 +54,24 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _handleNotificationToggle(
+    BuildContext context,
+    WidgetRef ref,
+    bool value,
+  ) async {
+    final controller = ref.read(notificationControllerProvider);
+    if (value) {
+      final granted = await controller.enable();
+      if (!granted && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('通知の権限が許可されなかったため、有効にできませんでした')),
+        );
+      }
+    } else {
+      await controller.disable();
+    }
   }
 
   Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {

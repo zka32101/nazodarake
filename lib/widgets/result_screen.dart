@@ -19,7 +19,7 @@ class ResultScreen extends StatelessWidget {
         '第${puzzle.stage}ステージの謎「${puzzle.question}」を解きました！\n'
         '難易度: ${puzzle.difficulty.label} / ジャンル: ${puzzle.genre.label}\n'
         'あなたも挑戦してみませんか？ #なぞだらけ';
-    await SharePlus.instance.share(ShareParams(text: text));
+    await Share.share(text);
   }
 
   @override

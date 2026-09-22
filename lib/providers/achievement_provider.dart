@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/achievement_model.dart';
 import 'progress_provider.dart';
+import 'sound_provider.dart';
 
 /// 実績の達成を監視し、新規達成時にポップアップ表示用の状態を保持する。
 ///
@@ -26,6 +27,7 @@ class AchievementNotifier extends StateNotifier<Achievement?> {
     final popup = allAchievements.where((a) => a.id == newIds.first);
     if (popup.isNotEmpty) {
       state = popup.first;
+      _ref.read(soundProvider).playAchievement();
     }
   }
 
