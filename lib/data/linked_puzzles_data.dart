@@ -10,7 +10,7 @@ const LinkedPuzzleSet stage12LinkedPuzzleSet = LinkedPuzzleSet(
   stage: 12,
   title: 'ナゾウの正体',
   description:
-      '4つの断片謎を解くと、それぞれ1つのカタカナが手に入る。\n'
+      '4つの断片謎を解くと、それぞれ1〜3文字のカタカナが手に入る。\n'
       '手に入れた文字を出題順につなげると、ナゾウの正体を表す言葉になるはずだ。',
   fragments: [
     LinkedFragmentPuzzle(
@@ -53,16 +53,16 @@ const LinkedPuzzleSet stage12LinkedPuzzleSet = LinkedPuzzleSet(
       question:
           '夜になると活動を始め、「ホーホー」と鳴く、ナゾウと同じ種類の鳥は何？（カタカナで回答）',
       answer: 'フクロウ',
-      fragment: 'ク',
+      fragment: 'クロウ',
       hints: ['ナゾウ自身がこの鳥です', '夜行性の鳥として知られています', '「森の忍者」とも呼ばれる鳥です'],
       difficulty: PuzzleDifficulty.easy,
       explanation:
-          'ナゾウは「フクロウ」です。この謎の断片は「ク」（「フクロウ」の2文字目）です。',
+          'ナゾウは「フクロウ」です。この謎の断片は「クロウ」（「フクロウ」の3〜4文字目）です。',
     ),
   ],
   finalAnswer: 'シマフクロウ',
   finalExplanation:
-      '「シ」「マ」「フ」「ク」をつなげると「シマフクロウ」。'
+      '「シ」「マ」「フ」「クロウ」をつなげると「シマフクロウ」。'
       'ナゾウの本当の種族は、北の島々に伝わる伝説の大きなフクロウ'
       '「シマフクロウ」だったのです。',
 );
