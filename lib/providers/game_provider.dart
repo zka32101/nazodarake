@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/puzzles_data.dart';
 import '../models/puzzle_model.dart';
 import 'progress_provider.dart';
+import 'sound_provider.dart';
 
 /// 現在プレイ中の謎解きの一時的な状態（画面遷移では消えてよい情報）。
 class PuzzlePlayState {
@@ -77,9 +78,11 @@ class GameNotifier extends StateNotifier<PuzzlePlayState?> {
     if (correct) {
       state = current.copyWith(isSolved: true, isWrongFeedback: false);
       _ref.read(progressProvider.notifier).markCleared(current.puzzle.id);
+      _ref.read(soundProvider).playCorrect();
     } else {
       state = current.copyWith(isWrongFeedback: true);
       _ref.read(progressProvider.notifier).recordWrongAttempt();
+      _ref.read(soundProvider).playWrong();
     }
     return correct;
   }

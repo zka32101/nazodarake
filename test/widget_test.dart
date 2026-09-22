@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -6,7 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   setUp(() {
-    SharedPreferences.setMockInitialValues({});
+    // オンボーディング表示済みとしてタイトル画面から始まるようにする
+    // （オンボーディング自体のテストは onboarding_and_notification_test.dart 等を参照）。
+    SharedPreferences.setMockInitialValues({
+      'nazodarake_progress_v1': jsonEncode({'hasSeenOnboarding': true}),
+    });
   });
 
   testWidgets('タイトル画面が表示される', (tester) async {
