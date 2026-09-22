@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nazodarake/models/puzzle_model.dart';
@@ -15,8 +16,26 @@ const _testPuzzle = Puzzle(
   difficulty: PuzzleDifficulty.easy,
 );
 
+/// audioplayers はテスト環境（プラットフォームチャンネル未実装）で
+/// MissingPluginException を送出するため、正誤判定時に呼ばれる
+/// SoundService からの呼び出しがテスト失敗の原因にならないよう
+/// 関連チャンネルをモックしておく。
+void _mockAudioplayersChannels() {
+  const globalChannel = MethodChannel('xyz.luan/audioplayers.global');
+  const playerChannel = MethodChannel('xyz.luan/audioplayers');
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(globalChannel, (MethodCall call) async {
+    return null;
+  });
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(playerChannel, (MethodCall call) async {
+    return null;
+  });
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  _mockAudioplayersChannels();
 
   group('GameNotifier', () {
     late ProviderContainer container;
