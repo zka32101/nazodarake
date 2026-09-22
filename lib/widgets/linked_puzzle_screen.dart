@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/linked_puzzle_model.dart';
+import '../models/puzzle_model.dart';
 import '../providers/linked_puzzle_provider.dart';
 import '../providers/progress_provider.dart';
 
