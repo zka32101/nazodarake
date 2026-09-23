@@ -27,17 +27,22 @@ class StageSelectScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(
-              child: Row(
-                children: [
-                  const Icon(Icons.monetization_on_rounded, color: Colors.amber),
-                  const SizedBox(width: 4),
-                  Text('$coins'),
-                ],
+              child: Semantics(
+                label: '所持コイン $coins 枚',
+                child: Row(
+                  children: [
+                    const Icon(Icons.monetization_on_rounded, color: Colors.amber),
+                    const SizedBox(width: 4),
+                    Text('$coins'),
+                  ],
+                ),
               ),
             ),
           ),
         ],
       ),
+      // 150問超のステージ一覧を扱うため、遅延構築の ListView.builder を使用
+      // （画面に表示されている分だけウィジェットを構築しパフォーマンスを確保する）。
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: stageNumbers.length,
@@ -51,12 +56,16 @@ class StageSelectScreen extends ConsumerWidget {
           final cost = stageUnlockCost(stage);
 
           String subtitle;
+          String statusLabel;
           if (unlocked) {
             subtitle = 'クリア: $clearedCount / ${puzzles.length} 問';
+            statusLabel = cleared ? 'クリア済み' : 'アンロック済み、挑戦できます';
           } else if (purchasable) {
             subtitle = '$cost コインでアンロックできます';
+            statusLabel = 'コインでアンロック可能';
           } else {
             subtitle = '前のステージをクリアすると解放されます';
+            statusLabel = 'ロック中';
           }
 
           return Card(
@@ -64,21 +73,24 @@ class StageSelectScreen extends ConsumerWidget {
             child: ListTile(
               enabled: unlocked || purchasable,
               contentPadding: const EdgeInsets.all(16),
-              leading: CircleAvatar(
-                backgroundColor: cleared
-                    ? Colors.amber
-                    : Theme.of(context).colorScheme.primaryContainer,
-                child: Icon(
-                  cleared
-                      ? Icons.emoji_events_rounded
-                      : (unlocked
-                          ? Icons.lock_open_rounded
-                          : (purchasable
-                              ? Icons.monetization_on_rounded
-                              : Icons.lock_rounded)),
-                  color: cleared
-                      ? Colors.white
-                      : Theme.of(context).colorScheme.onPrimaryContainer,
+              leading: Semantics(
+                label: 'ステージ$stageの状態: $statusLabel',
+                child: CircleAvatar(
+                  backgroundColor: cleared
+                      ? Colors.amber
+                      : Theme.of(context).colorScheme.primaryContainer,
+                  child: Icon(
+                    cleared
+                        ? Icons.emoji_events_rounded
+                        : (unlocked
+                            ? Icons.lock_open_rounded
+                            : (purchasable
+                                ? Icons.monetization_on_rounded
+                                : Icons.lock_rounded)),
+                    color: cleared
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
                 ),
               ),
               title: Text(

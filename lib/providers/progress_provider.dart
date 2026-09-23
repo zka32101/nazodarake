@@ -24,6 +24,7 @@ class ProgressState {
     this.hasSeenOnboarding = false,
     this.notificationsEnabled = false,
     this.languageCode,
+    this.textScaleOption = 'standard',
   });
 
   final Set<String> clearedPuzzleIds;
@@ -71,6 +72,11 @@ class ProgressState {
   /// 手動で選択した表示言語（'ja' / 'en'）。null の場合は端末設定に従う。
   final String? languageCode;
 
+  /// 文字サイズ設定（'small' / 'standard' / 'large'）。
+  /// アクセシビリティ対応：設定画面から変更でき、[AppTextScale] で
+  /// 実際の倍率にマッピングされる。
+  final String textScaleOption;
+
   int get totalAttempts => wrongAttempts + correctAttempts;
 
   double get accuracy {
@@ -97,6 +103,7 @@ class ProgressState {
     bool? hasSeenOnboarding,
     bool? notificationsEnabled,
     Object? languageCode = _unset,
+    String? textScaleOption,
   }) {
     return ProgressState(
       clearedPuzzleIds: clearedPuzzleIds ?? this.clearedPuzzleIds,
@@ -121,6 +128,7 @@ class ProgressState {
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
       languageCode:
           identical(languageCode, _unset) ? this.languageCode : languageCode as String?,
+      textScaleOption: textScaleOption ?? this.textScaleOption,
     );
   }
 
@@ -143,6 +151,7 @@ class ProgressState {
         'hasSeenOnboarding': hasSeenOnboarding,
         'notificationsEnabled': notificationsEnabled,
         'languageCode': languageCode,
+        'textScaleOption': textScaleOption,
       };
 
   factory ProgressState.fromJson(Map<String, dynamic> json) {
@@ -180,6 +189,7 @@ class ProgressState {
       hasSeenOnboarding: json['hasSeenOnboarding'] as bool? ?? false,
       notificationsEnabled: json['notificationsEnabled'] as bool? ?? false,
       languageCode: json['languageCode'] as String?,
+      textScaleOption: json['textScaleOption'] as String? ?? 'standard',
     );
   }
 }
@@ -373,6 +383,12 @@ class ProgressNotifier extends StateNotifier<ProgressState> {
   /// 表示言語を手動で設定する。null を渡すと端末設定に従う（自動）に戻す。
   Future<void> setLanguageCode(String? languageCode) async {
     state = state.copyWith(languageCode: languageCode);
+    await _persist();
+  }
+
+  /// 文字サイズ設定（'small' / 'standard' / 'large'）を変更する。
+  Future<void> setTextScaleOption(String option) async {
+    state = state.copyWith(textScaleOption: option);
     await _persist();
   }
 

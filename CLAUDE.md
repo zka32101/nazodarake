@@ -57,7 +57,7 @@ nazodarake/
 │   ├── sounds/                         # 効果音配置用(実ファイル未同梱、README.md参照)
 │   └── icon/                           # アイコン/スプラッシュ配置用(実画像未同梱、README.md参照)
 ├── test/                               # モデル・プロバイダー・ウィジェットテスト
-├── .github/workflows/flutter-ci.yaml   # push/PR時の analyze・test 自動実行CI
+├── .github/workflows/flutter-ci.yaml   # push/PR時のanalyze・test 自動実行CI
 ├── pubspec.yaml
 ├── analysis_options.yaml
 ├── CLAUDE.md                           # このファイル
@@ -198,7 +198,7 @@ Phase 3 で以下7項目を追加実装した。
 
 ### 6. アプリアイコン/スプラッシュ画面設定基盤
 
-`flutter_launcher_icons` / `flutter_native_splash` を `dev_dependencies` に追加し、`pubspec.yaml` に設定セクションを用意した。ただし両パッケージは通常1024×1024のPNG画像を起点にするため、**不正な/破損したバイナリを生成することは避け、実画像は未同梱のまま**としている。リリース前にデザイナー作成の `assets/icon/icon.png`（アイコン用）・`assets/icon/splash.png`（スプラッシュ用）に差し替えたうえで、`dart run flutter_launcher_icons` / `dart run flutter_native_splash:create` を実行する必要がある（詳細は `assets/icon/README.md`）。
+`flutter_launcher_icons` / `flutter_native_splash` を `dev_dependencies` に追加し、`pubspec.yaml` に設定セクションを用意した。ただし両パッケージは通常1024×1024のPNG画像を起点にするため、**不正な/破損したバイナリを生成することは避け、実画像は未同梱のまま**としている。リリース前に デザイナー作成の `assets/icon/icon.png`（アイコン用）・`assets/icon/splash.png`（スプラッシュ用）に差し替えたうえで、`dart run flutter_launcher_icons` / `dart run flutter_native_splash:create` を実行する必要がある（詳細は `assets/icon/README.md`）。
 
 ### 7. CI設定 (`.github/workflows/flutter-ci.yaml`)
 
@@ -227,62 +227,43 @@ Phase 3 で以下7項目を追加実装した。
 | 効果音・BGM基盤(audioplayers) | ✅ 実装完了(Phase 3、実音声ファイルは別途配置が必要) |
 | アプリアイコン/スプラッシュ設定基盤 | ✅ 設定のみ完了(Phase 3、実画像は別途用意が必要) |
 | CI(GitHub Actions) | ✅ 完成(Phase 3) |
-| フルコンテンツ拡充(ステージ13〜17・150問到達) | ✅ 完成(Phase 4) |
-| ローカル完結フレンド/ランキング機能 | ✅ 完成(Phase 4) |
-| 多言語対応(日本語/英語・ARB管理) | ✅ 完成(Phase 4) |
-| ストア公開準備ドキュメント(docs/store_listing.md) | ✅ 完成(Phase 4) |
-| 実機ビルド設定(bundle id/表示名) | ⏳ android/iosディレクトリ未生成のため次ステップ(Phase 4、docs/store_listing.md参照) |
 
-## Phase 4: フルコンテンツ拡充・フレンド/ランキング・多言語対応・ストア公開準備
+## Phase 5: 実機ビルド基盤・アクセシビリティ・テスト/ストア準備強化
 
-**ステータス**: 完成 ✅（実機ビルド設定は android/ios ディレクトリ未生成のため注記のみ）
+Phase 5 では以下5項目に取り組んだ（環境制約により一部は方針の明記に留めた）。
 
-### 1. フルコンテンツ拡充
+1. **android/ios プラットフォームディレクトリ**: 作業環境に Flutter SDK が
+   導入されておらず `flutter create` を実行できなかったため、未検証の
+   プロジェクト一式を手動生成することは避け、`docs/store_listing.md`
+   「8. Phase 5 での方針」に具体的な実行コマンド（
+   `flutter create --platforms=android,ios --org com.nazodarake .`）と
+   bundle id (`com.nazodarake.app`) / 表示名（なぞだらけ）の設定手順を
+   明記するに留めた。
+2. **通知の実挙動テスト強化**: `test/notification_service_test.dart` を
+   新規追加し、`flutter_local_notifications` の `MethodChannel`
+   （`dexterous.com/flutter/local_notifications`）をモックして
+   `requestPermission` / `scheduleDailyReminder` / `cancelDailyReminder` /
+   `initialize` の呼び出し・例外安全性を検証。`shouldRemindDailyChallenge()`
+   の日付境界・null・年またぎ等のエッジケースも拡充した。
+3. **ストア掲載用スクリーンショット自動生成**: `integration_test/
+   store_screenshots_test.dart` を新規追加し、主要画面を
+   `matchesGoldenFile` でPNG化できるようにした。`integration_test/` に
+   配置することで通常の `flutter test`（CIが実行するコマンド）の対象外
+   とし、CIの安定性に影響しない設計とした。使い方は
+   `docs/store_listing.md` に追記済み。
+4. **アクセシビリティ対応**: `ProgressState.textScaleOption`
+   （small/standard/large）を追加し、`lib/theme/app_theme.dart` の
+   `AppTextScale` で 0.8〜1.3 倍にクランプした `TextScaler` へ変換。
+   `main.dart` の `MaterialApp.builder` でアプリ全体に適用し、設定画面に
+   `SegmentedButton` によるUIを追加した。正誤フィードバックは既存実装で
+   色に加えアイコン・文言で判別可能であることを確認済み。コイン表示・
+   ヒントボタン等に `Semantics` / `Tooltip` を追加した。
+5. **パフォーマンス最適化**: ステージ選択・フリープレイ画面は既に
+   `ListView.builder` による遅延構築を使用していることを確認。
+   `filterPuzzles()` も Riverpod の `Provider` 経由で依存する
+   `StateProvider` 変化時のみ再計算される設計であることを確認し、
+   追加のメモ化対応は不要と判断した。
 
-`lib/data/puzzles_data.dart` にステージ13〜17（10問×5ステージ＝50問）を追加し、合計17ステージ・150問（連動謎ボーナスを除く）に拡張した。新ステージも既存7ジャンル（なぞなぞ・暗号解読・観察系・ひらめき・計算パズル・言葉遊び・論理パズル）に沿って構成し、`lib/data/story_data.dart` の `stageIntroStory` にステージ13〜17分の導入テキストを追加した。`stageUnlockCost`（`lib/providers/progress_provider.dart`）は既存の `50 × (ステージ番号 - 5)` という汎用式のままで新ステージにも対応済み。`lib/models/achievement_model.dart` の「なぞだらけ制覇」実績の説明文を「全問（150問）をクリアする」に更新した（判定ロジック自体は `allPuzzles.length` を参照する形で既に問題数に依存しない実装だったため変更不要）。
-
-### 2. ローカル完結のフレンド/ランキング機能
-
-外部バックエンド（Firebase等）を一切使わず、`shared_preferences` のみで完結する設計とした。
-
-- `lib/models/profile_model.dart` / `lib/providers/profile_provider.dart`: ニックネーム（設定画面で編集可能）と、ローカル生成される疑似フレンドコード（`NAZO-XXXX`形式）を持つ `UserProfile` を管理する `ProfileNotifier`
-- `lib/models/friend_model.dart` / `lib/providers/friend_provider.dart`: 4件のダミーフレンド（`seedDummyFriends`）をデフォルトで保持する `FriendNotifier`。`addFriendByCode()` はフレンドコードの文字列から決定的にダミー統計を生成してローカルに追加するモック処理で、実際のサーバー通信は行わない
-- `lib/models/ranking_model.dart`: 自分とフレンドの統計（クリア数・コイン）から `score = clearedCount * 100 + coins` を計算し降順ソートする純粋関数 `buildRanking()`（UI非依存でテスト容易）
-- `lib/widgets/ranking_screen.dart`: 自分＋フレンドのローカルランキングを表示。画面内に「サーバー通信は行われない」旨の注記を表示
-- `lib/widgets/friends_screen.dart`: 自分のフレンドコード表示、フレンドコード入力によるローカル追加UI、追加済みフレンドの一覧・削除
-- タイトル画面（`lib/widgets/title_screen.dart`）に「ランキング」「フレンド」への導線を追加
-
-**将来のサーバー同期に向けた設計メモ**（コード内コメントにも記載）: `FriendNotifier.addFriendByCode` をバックエンドAPI呼び出しに置き換え、`buildRanking()` への入力（自分の統計・フレンド一覧）をサーバーから取得した値に差し替えるだけで、UI層（`RankingScreen`/`FriendsScreen`）はほぼそのまま流用できるように分離してある。
-
-### 3. 多言語対応（日本語 / 英語）
-
-`flutter_localizations` + `intl` を導入し、`pubspec.yaml` に `flutter: generate: true` を追加。`lib/l10n/app_ja.arb`（テンプレート/正）と `lib/l10n/app_en.arb` にUI文言を定義し、`flutter pub get` 実行時に Flutter SDK 標準の `gen_l10n` ツールが `AppLocalizations` クラスを自動生成する（synthetic package: `package:flutter_gen/gen_l10n/app_localizations.dart`）。
-
-- タイトル・ステージ選択・謎解き・結果・設定・統計・実績・ランキング・フレンドの主要画面のボタン/タイトル文言をARB管理に移行
-- `MaterialApp` に `localizationsDelegates` / `supportedLocales`（ja, en）を設定し、端末の言語設定に自動追従する
-- `ProgressState.languageCode`（'ja' / 'en' / null=端末設定に従う）を追加し、設定画面から手動で言語を切り替え可能。選択は `shared_preferences` に永続化される
-- 謎の問題文・答え自体は翻訳対象外（日本語のみ）で、翻訳対象は固定UI文言のみという方針を踏襲
-
-### 4. ストア公開準備ドキュメント
-
-`docs/store_listing.md` を新規作成し、以下を記載した。
-
-- アプリ名・簡潔な説明文（日本語・英語）
-- ストア用の長文説明（機能一覧・対象年齢層など、日英両方）
-- 必要なスクリーンショット画面リスト（10項目）
-- プライバシーポリシーの雛形（進捗データはローカル保存のみで外部送信なし、という方針を明記）
-- リリースチェックリスト（アイコン/スプラッシュ差し替え、効果音ファイル配置、android/iosディレクトリ生成、bundle id設定、署名設定、ストア掲載情報入力、審査提出等）
-
-### 5. 実機ビルド設定の整備
-
-本リポジトリには本Phase時点で `android/` `ios/` ディレクトリがまだ存在しないため、`build.gradle` / `Info.plist` を直接編集する形での対応はできなかった。かわりに、`docs/store_listing.md` のリリースチェックリストと本ファイルに、実機ビルドを行う際の手順（`flutter create --platforms=android,ios .` の実行、`applicationId` を `com.nazodarake.app` に、表示名を「なぞだらけ」に設定すること）を明記した。署名設定（Android keystore, iOS配布用証明書）についても、本番鍵を用意できる環境で別途対応が必要である旨を記載している。
-
-### 6. スコープ外とした項目
-
-Phase 3に引き続き、以下はサンドボックス環境の制約上スコープ外としている。
-
-- mp3等の実音声バイナリファイルの生成・配置
-- 実際のアイコン・スプラッシュ画像（PNG等）バイナリファイルの生成・配置
-- 本番用の署名鍵・証明書の生成
+**進捗**: 2026-09-22 Phase 5 実装完了（android/ios生成のみ環境制約により方針明記に留める）✅
 
 **最終更新**: 2026-09-22

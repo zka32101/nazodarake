@@ -84,12 +84,15 @@ class _PuzzleScreenState extends ConsumerState<PuzzleScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Center(
-              child: Row(
-                children: [
-                  const Icon(Icons.monetization_on_rounded, color: Colors.amber),
-                  const SizedBox(width: 4),
-                  Text('$coins'),
-                ],
+              child: Semantics(
+                label: '所持コイン $coins 枚',
+                child: Row(
+                  children: [
+                    const Icon(Icons.monetization_on_rounded, color: Colors.amber),
+                    const SizedBox(width: 4),
+                    Text('$coins'),
+                  ],
+                ),
               ),
             ),
           ),
@@ -120,26 +123,30 @@ class _PuzzleScreenState extends ConsumerState<PuzzleScreen> {
               ),
               const SizedBox(height: 20),
               if (playState.isWrongFeedback)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: colorScheme.errorContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.close_rounded,
-                          color: colorScheme.onErrorContainer),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          '残念、正解ではありません。もう一度考えてみよう！',
-                          style: TextStyle(color: colorScheme.onErrorContainer),
+                Semantics(
+                  liveRegion: true,
+                  label: '不正解です。もう一度考えてみましょう。',
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: colorScheme.errorContainer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.close_rounded,
+                            color: colorScheme.onErrorContainer),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            '残念、正解ではありません。もう一度考えてみよう！',
+                            style: TextStyle(color: colorScheme.onErrorContainer),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               if (puzzle.isFreeInput)
@@ -182,10 +189,13 @@ class _FreeInputArea extends StatelessWidget {
           onSubmitted: onSubmit,
         ),
         const SizedBox(height: 12),
-        ElevatedButton.icon(
-          onPressed: () => onSubmit(controller.text),
-          icon: const Icon(Icons.send_rounded),
-          label: const Text('こたえる'),
+        Tooltip(
+          message: '入力した答えを送信します',
+          child: ElevatedButton.icon(
+            onPressed: () => onSubmit(controller.text),
+            icon: const Icon(Icons.send_rounded),
+            label: const Text('こたえる'),
+          ),
         ),
       ],
     );
@@ -255,20 +265,26 @@ class _HintSection extends ConsumerWidget {
             ),
           ),
         if (hasMoreHints)
-          OutlinedButton.icon(
-            onPressed: () {
-              final revealed = ref.read(gameProvider.notifier).revealNextHint();
-              if (!revealed) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('コインが足りません。広告を見てコインを獲得しよう！')),
-                );
-              }
-            },
-            icon: const Icon(Icons.lightbulb_outline_rounded),
-            label: Text(
-              nextHintCost == 0
-                  ? 'ヒントを見る (${hintLevel + 1}/${puzzle.hints.length}) ・無料'
-                  : 'ヒントを見る (${hintLevel + 1}/${puzzle.hints.length}) ・$nextHintCostコイン',
+          Tooltip(
+            message: nextHintCost == 0
+                ? '無料で次のヒントを表示します'
+                : '$nextHintCostコインを消費して次のヒントを表示します',
+            child: OutlinedButton.icon(
+              onPressed: () {
+                final revealed =
+                    ref.read(gameProvider.notifier).revealNextHint();
+                if (!revealed) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('コインが足りません。広告を見てコインを獲得しよう！')),
+                  );
+                }
+              },
+              icon: const Icon(Icons.lightbulb_outline_rounded),
+              label: Text(
+                nextHintCost == 0
+                    ? 'ヒントを見る (${hintLevel + 1}/${puzzle.hints.length}) ・無料'
+                    : 'ヒントを見る (${hintLevel + 1}/${puzzle.hints.length}) ・$nextHintCostコイン',
+              ),
             ),
           ),
       ],

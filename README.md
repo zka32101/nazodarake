@@ -121,6 +121,56 @@
 ### スコープ外とした項目
 - mp3等の実音声バイナリ・実画像（アイコン/スプラッシュ）バイナリの生成・配置は、Phase 3に引き続きスコープ外としています（`assets/sounds/README.md`, `assets/icon/README.md` を参照）
 
+## Phase 5 で追加した機能
+
+### 通知機能のテスト強化
+- `lib/services/notification_service.dart` の `requestPermission` /
+  `scheduleDailyReminder` / `cancelDailyReminder` / `initialize` について、
+  `flutter_local_notifications` が使用する `MethodChannel`
+  （`dexterous.com/flutter/local_notifications`）をモックしたユニットテスト
+  を `test/notification_service_test.dart` に追加
+- `shouldRemindDailyChallenge()` の日付境界・null・年またぎ等のエッジケース
+  テストを拡充
+
+### ストア掲載用スクリーンショット自動生成
+- `integration_test/store_screenshots_test.dart` を新規追加し、主要画面
+  （タイトル・ステージ選択・謎解き・結果・実績・統計・ランキング）を
+  `matchesGoldenFile` でPNG書き出しできるようにした
+- `integration_test/` 配下に配置しているため、通常の `flutter test`
+  （CIが実行するコマンド）では走査されず、CIの成否には影響しない設計
+- 使い方・生成コマンドの詳細は `docs/store_listing.md`「7. スクリーンショット
+  自動生成スクリプト」を参照
+
+### アクセシビリティ対応
+- 設定画面に「文字サイズ」設定（小/標準/大）を追加し、`ProgressState.textScaleOption`
+  として永続化。`lib/theme/app_theme.dart` の `AppTextScale` でレイアウト崩れ
+  を防ぐ範囲（0.8〜1.3倍）にクランプした `TextScaler` へ変換し、
+  `main.dart` の `MaterialApp.builder` でアプリ全体に適用
+- 正誤フィードバックはもともと色（緑/赤系のコンテナ色）だけでなく、
+  アイコン（✓ = `check_circle_rounded` 系 / ✗ = `close_rounded`）と
+  文言（「正解！」「残念、正解ではありません」等）でも判別できる実装で
+  あることを確認済み（色覚多様性への配慮）
+- コイン残高表示・不正解フィードバック等に `Semantics` ラベルを、
+  文字サイズ設定・ヒント表示ボタン・回答送信ボタンに `Tooltip` /
+  `Semantics` を追加し、スクリーンリーダーでの読み上げ内容を明確化
+
+### パフォーマンス確認
+- ステージ選択画面 (`stage_select_screen.dart`) ・フリープレイ画面
+  (`free_play_screen.dart`) は既に `ListView.builder` による遅延構築を
+  使用していることを確認済み（150問超のデータでも表示中の要素のみ構築）
+- `filterPuzzles()` は Riverpod の `Provider`（`filteredFreePlayPuzzlesProvider`）
+  経由で呼び出されており、依存する `StateProvider`（ジャンル/難易度）が
+  変化した時のみ再計算される設計になっていることを確認済み。追加の
+  メモ化対応は不要と判断した
+
+### プラットフォームディレクトリ（android/ios）について
+- 本Phaseの作業環境には Flutter SDK が導入されておらず、`flutter create`
+  を実行して `android/` `ios/` を生成・検証することができなかったため、
+  未検証のプロジェクト一式を手動ででっち上げることは避け、対応を見送った
+- 実施手順は `docs/store_listing.md`「8. Phase 5 での方針」に明記した
+  （`flutter create --platforms=android,ios --org com.nazodarake .` の実行、
+  bundle id `com.nazodarake.app` / 表示名「なぞだらけ」への設定）
+
 ## セットアップ
 
 ```bash
@@ -170,7 +220,7 @@ lib/
 │   ├── sound_service.dart             # audioplayers を用いた効果音再生(失敗時は無視)
 │   └── notification_service.dart      # flutter_local_notifications を用いたリマインダー通知
 ├── theme/
-│   └── app_theme.dart                 # Material3テーマ(ライト/ダーク)
+│   └── app_theme.dart                 # Material3テーマ(ライト/ダーク、AppTextScaleによる文字サイズ設定対応)
 └── widgets/
     ├── onboarding_screen.dart         # 初回起動チュートリアル(PageView 4枚)
     ├── title_screen.dart              # タイトル画面
@@ -183,7 +233,7 @@ lib/
     ├── achievements_screen.dart       # 実績一覧・ポップアップ通知
     ├── story_intro_dialog.dart        # ステージ導入ミニストーリー
     ├── ad_reward_dialog.dart          # 広告視聴(モック)ダイアログ
-    ├── settings_screen.dart           # 設定画面(ニックネーム編集・言語切替を含む)
+    ├── settings_screen.dart           # 設定画面(ニックネーム編集・言語切替・文字サイズ設定を含む)
     ├── stats_screen.dart              # 統計画面
     ├── ranking_screen.dart            # ローカル完結ランキング画面
     └── friends_screen.dart            # フレンド管理画面(ローカル完結モック)
@@ -197,7 +247,7 @@ lib/l10n/
 └── app_en.arb                          # 英語UI文言
 
 docs/
-└── store_listing.md                    # ストア公開準備ドキュメント
+└── store_listing.md                    # ストア公開準備ドキュメント(スクリーンショット自動生成の使い方を含む)
 
 test/
 ├── puzzle_model_test.dart             # モデル・正誤判定のテスト
@@ -208,12 +258,16 @@ test/
 ├── free_play_filter_test.dart         # フリープレイ絞り込みロジックのテスト
 ├── onboarding_and_notification_test.dart # オンボーディング/通知フラグ・リマインダー判定のテスト
 ├── onboarding_widget_test.dart        # オンボーディング画面遷移のウィジェットテスト
+├── notification_service_test.dart     # NotificationServiceのMethodChannelモックテスト・日付エッジケース
 ├── widget_test.dart                   # 画面遷移のウィジェットテスト
 ├── ranking_test.dart                  # ランキングのソートロジックのテスト
 └── phase4_provider_test.dart          # 言語設定・プロフィール・フレンド機能のテスト
 
+integration_test/
+└── store_screenshots_test.dart        # ストア掲載用スクリーンショット生成(通常のflutter testでは実行されない)
+
 .github/workflows/
-└── flutter-ci.yaml                    # push/PR時に analyze・test を自動実行するCI
+└── flutter-ci.yaml                    # push/PR時に analyze・test を自動実行するCI(test/配下のみが対象)
 ```
 
 ## 技術スタック

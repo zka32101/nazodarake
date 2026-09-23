@@ -8,7 +8,7 @@ import '../providers/progress_provider.dart';
 import 'onboarding_screen.dart';
 
 /// 簡易設定画面：音のオン/オフ、通知のオン/オフ、ニックネーム編集、
-/// 言語切替、チュートリアル再表示、進捗リセット。
+/// 言語切替、文字サイズ切替、チュートリアル再表示、進捗リセット。
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -51,6 +51,62 @@ class SettingsScreen extends ConsumerWidget {
             onChanged: (value) => _handleNotificationToggle(context, ref, value),
           ),
           const Divider(height: 32),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.format_size_rounded),
+                    const SizedBox(width: 12),
+                    Text(
+                      '文字サイズ',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                const Padding(
+                  padding: EdgeInsets.only(left: 36),
+                  child: Text('アプリ全体の文字の大きさを調整します（読みやすさ・アクセシビリティ対応）'),
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.only(left: 36),
+                  child: Semantics(
+                    label: '文字サイズの設定。現在は${_textScaleLabel(progress.textScaleOption)}です。',
+                    child: SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(
+                          value: 'small',
+                          label: Text('小'),
+                          tooltip: '文字サイズを小さくします',
+                        ),
+                        ButtonSegment(
+                          value: 'standard',
+                          label: Text('標準'),
+                          tooltip: '文字サイズを標準に戻します',
+                        ),
+                        ButtonSegment(
+                          value: 'large',
+                          label: Text('大'),
+                          tooltip: '文字サイズを大きくします',
+                        ),
+                      ],
+                      selected: {progress.textScaleOption},
+                      onSelectionChanged: (selection) {
+                        ref
+                            .read(progressProvider.notifier)
+                            .setTextScaleOption(selection.first);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 32),
           ListTile(
             leading: const Icon(Icons.school_rounded),
             title: Text(l10n.settingsReplayTutorial),
@@ -83,6 +139,18 @@ class SettingsScreen extends ConsumerWidget {
         return l10n.settingsLanguageEnglish;
       default:
         return l10n.settingsLanguageSystem;
+    }
+  }
+
+  String _textScaleLabel(String option) {
+    switch (option) {
+      case 'small':
+        return '小';
+      case 'large':
+        return '大';
+      case 'standard':
+      default:
+        return '標準';
     }
   }
 

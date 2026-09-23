@@ -197,3 +197,61 @@ calculation puzzles, wordplay, and logic puzzles.
 - 本番用の署名鍵・証明書の生成
 
 これらは、実機・実際のデザインアセットが用意できる環境で別途対応してください。
+
+## 7. スクリーンショット自動生成スクリプト（Phase 5 追加）
+
+主要画面（タイトル・ステージ選択・謎解き・結果・実績・統計・ランキング）を
+`flutter_test` のゴールデンテスト機構（`matchesGoldenFile`）を使って PNG に
+書き出す仕組みを `integration_test/store_screenshots_test.dart` に用意して
+います。
+
+### 使い方
+
+初回生成、または画面デザイン変更後の再生成は、以下のコマンドで行います
+（`--update-goldens` は比較を行わずゴールデン画像を上書き生成するモード）。
+
+```bash
+flutter test integration_test/store_screenshots_test.dart --update-goldens
+```
+
+生成された PNG は `integration_test/goldens/*.png` に保存されます。これを
+そのままストア掲載用スクリーンショットの下地（実機体裁への加工前の素材）
+として利用できます。
+
+`--update-goldens` を付けずに実行すると、保存済みのゴールデン画像との
+ピクセル比較テストとして動作しますが、フォントレンダリングやOSのバージョン
+差でCI環境と手元環境で結果がずれやすいため、**このリポジトリではCIの
+自動テスト対象には含めていません**（後述）。
+
+### なぜCI (`flutter-ci.yaml`) では実行しないのか
+
+`.github/workflows/flutter-ci.yaml` は `flutter test`（パス省略）を実行して
+おり、これは `test/` ディレクトリ配下のみを走査します。
+`store_screenshots_test.dart` は意図的に `integration_test/` ディレクトリに
+配置しているため、通常の `flutter test` では実行対象に含まれず、CIの
+グリーン/レッド判定に影響しません。
+
+スクリーンショットを更新したい場合は、開発者が手元で明示的に
+`flutter test integration_test/store_screenshots_test.dart --update-goldens`
+を実行し、生成された画像を確認したうえでコミットしてください。
+
+## 8. Phase 5 での方針（android/ios プラットフォームディレクトリについて）
+
+Phase 5 の作業環境には Flutter SDK が導入されておらず、`flutter create` を
+実行して `android/` `ios/` ディレクトリを生成・検証することができませんでした。
+不完全・未検証のプラットフォームプロジェクト一式を手動ででっち上げることは
+かえってビルド不能な状態を招く恐れがあるため、本Phaseでは見送り、
+本ドキュメント「5. リリースチェックリスト」に記載の通り、実際にリリース
+作業を行う際は以下を実行してください。
+
+```bash
+flutter create --platforms=android,ios --org com.nazodarake .
+```
+
+実行後は、以下の設定を確認・反映してください。
+
+- Android: `android/app/build.gradle` の `applicationId` を
+  `com.nazodarake.app` に、`android/app/src/main/AndroidManifest.xml` の
+  `android:label` を「なぞだらけ」に設定する
+- iOS: `ios/Runner/Info.plist` の `CFBundleDisplayName` を「なぞだらけ」に、
+  Xcode の Bundle Identifier を `com.nazodarake.app` に設定する

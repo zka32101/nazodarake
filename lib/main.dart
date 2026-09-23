@@ -32,6 +32,10 @@ class NazodarakeApp extends ConsumerWidget {
     final languageCode = ref.watch(
       progressProvider.select((state) => state.languageCode),
     );
+    // アクセシビリティ対応：設定画面で選んだ文字サイズ（小/標準/大）。
+    final textScaleOption = ref.watch(
+      progressProvider.select((state) => state.textScaleOption),
+    );
     return MaterialApp(
       title: 'なぞだらけ',
       scaffoldMessengerKey: rootScaffoldMessengerKey,
@@ -47,8 +51,20 @@ class NazodarakeApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      builder: (context, child) =>
-          AchievementPopupListener(child: child ?? const SizedBox.shrink()),
+      builder: (context, child) {
+        // 設定画面の文字サイズをアプリ全体の TextScaler に反映する。
+        // 極端な値でレイアウトが崩れないよう [AppTextScale] 内でクランプ済み。
+        final mediaQuery = MediaQuery.of(context);
+        final scaledMediaQuery = mediaQuery.copyWith(
+          textScaler: AppTextScale.scalerFor(textScaleOption),
+        );
+        return MediaQuery(
+          data: scaledMediaQuery,
+          child: AchievementPopupListener(
+            child: child ?? const SizedBox.shrink(),
+          ),
+        );
+      },
       home: const AppEntryPoint(),
     );
   }

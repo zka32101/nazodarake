@@ -32,12 +32,15 @@ class TitleScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Center(
-                child: Row(
-                  children: [
-                    const Icon(Icons.monetization_on_rounded, color: Colors.amber),
-                    const SizedBox(width: 4),
-                    Text('$coins'),
-                  ],
+                child: Semantics(
+                  label: '所持コイン $coins 枚',
+                  child: Row(
+                    children: [
+                      const Icon(Icons.monetization_on_rounded, color: Colors.amber),
+                      const SizedBox(width: 4),
+                      Text('$coins'),
+                    ],
+                  ),
                 ),
               ),
             ),
